@@ -15,7 +15,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
 
     cors:{
-    origin:"*",
+    origin:"https://tea-nine-flax.vercel.app/",
     methods:["GET","POST"]
 }
 
