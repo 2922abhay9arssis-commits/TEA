@@ -2,6 +2,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+let onlineUsers = {};
 
 
 const app = express();
@@ -26,6 +27,23 @@ io.on(
 "connection",
 
 (socket)=>{
+
+    socket.on(
+"user-online",
+(uid)=>{
+
+
+onlineUsers[uid]=socket.id;
+
+
+io.emit(
+"online-users",
+Object.keys(onlineUsers)
+);
+
+
+}
+);
 
 
 console.log(

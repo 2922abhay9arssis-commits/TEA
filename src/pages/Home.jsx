@@ -47,6 +47,9 @@ db
 
 function Home(){
 
+    const [onlineUsers,setOnlineUsers] =
+useState([]);
+
     const [chatInfo,setChatInfo] =
 useState({});
 
@@ -85,6 +88,34 @@ const [users,setUsers] =
 useState([]);
 const [selectedUser,setSelectedUser] =
 useState(null);
+
+useEffect(()=>{
+
+
+if(!auth.currentUser)
+return;
+
+
+socket.emit(
+"user-online",
+auth.currentUser.uid
+);
+
+
+
+socket.on(
+"online-users",
+(users)=>{
+
+
+setOnlineUsers(users);
+
+
+}
+);
+
+
+},[]);
 
 useEffect(()=>{
 
@@ -929,6 +960,23 @@ text-lg
 ">
 
 {selectedUser.name}
+
+<p className="
+text-sm
+text-green-500
+">
+
+{
+
+onlineUsers.includes(selectedUser.uid)
+?
+"🟢 Online"
+:
+"Offline"
+
+}
+
+</p>
 
 </h2>
 
