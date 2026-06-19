@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 
 
 export const socket =
-io("http://localhost:3000");
+io("tea-production-a9fb.up.railway.app");
 
 
 socket.on("connect",()=>{
