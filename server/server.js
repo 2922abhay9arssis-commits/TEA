@@ -29,6 +29,24 @@ io.on(
 (socket)=>{
 
     socket.on(
+"typing",
+
+(data)=>{
+
+
+socket
+.to(data.room)
+.emit(
+"user-typing",
+data
+);
+
+
+}
+
+);
+
+    socket.on(
 "user-online",
 (uid)=>{
 
