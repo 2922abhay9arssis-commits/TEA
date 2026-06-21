@@ -7,7 +7,12 @@ let onlineUsers = {};
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+origin:[
+"http://localhost:5173",
+"https://tea-nine-flax.vercel.app"
+]
+}));
 
 
 const server = http.createServer(app);
@@ -16,7 +21,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
 
     cors:{
-    origin:"https://tea-nine-flax.vercel.app/",
+    origin:["http://localhost:5173","https://tea-nine-flax.vercel.app/"],
     methods:["GET","POST"]
 }
 

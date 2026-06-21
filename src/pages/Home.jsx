@@ -4,7 +4,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { socket } from "../socket/socket";
 import { Search, Settings } from "lucide-react";
 import logo from "../assets/tea-logo.png";
-import { useState, useEffect, useRef } from "react";
+import React,{ useState, useEffect, useRef } from "react";
 
 import {
   collection,
@@ -221,6 +221,51 @@ function Home() {
     setUsers(foundUsers);
   }
 
+  function getMessageDate(time){
+
+if(!time?.toDate) return "";
+
+const msgDate = time.toDate();
+
+const today = new Date();
+
+const yesterday = new Date();
+yesterday.setDate(today.getDate()-1);
+
+
+if(
+msgDate.toDateString()
+===
+today.toDateString()
+){
+
+return "Today";
+
+}
+
+
+if(
+msgDate.toDateString()
+===
+yesterday.toDateString()
+){
+
+return "Yesterday";
+
+}
+
+
+return msgDate.toLocaleDateString(
+"en-IN",
+{
+day:"numeric",
+month:"long",
+year:"numeric"
+}
+);
+
+}
+
   return (
     <div className="
     fixed
@@ -371,29 +416,244 @@ function Home() {
     p-5
     bg-[#f5efe6]
 ">
-                {messages.map((msg, index) => {
+  {
+messages.map((msg,index)=>{
+
+
+const currentDate =
+getMessageDate(msg.time);
+
+
+const previousDate =
+index > 0
+?
+getMessageDate(messages[index-1].time)
+:
+null;
+
+
+const showDate =
+currentDate !== previousDate;
                   const isMe = msg.sender === auth.currentUser.uid;
                   return (
-                    <div key={index} className={`flex mb-3 ${isMe ? "justify-end" : "justify-start"}`}>
-                      <div className={`px-4 py-2 rounded-2xl max-w-[60%] shadow ${isMe ? "bg-[#454c4f] text-white rounded-br-none" : "bg-white text-black rounded-bl-none"}`}>
-                        {msg.type === "gif" ? (
-                          <img src={msg.gif} className="w-48 rounded-xl" />
-                        ) : (
-                          <p>{msg.text}</p>
-                        )}
 
-                        <p className="text-xs opacity-60 mt-1 text-right">
-                          {msg.time?.toDate ? msg.time.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""}
-                          {isMe && <span>{msg.seen ? " ✓✓" : " ✓"}</span>}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+<React.Fragment key={index}>
+
+{
+showDate && (
+
+<div className="
+text-center
+my-4
+">
+
+<span className="
+bg-white
+px-4
+py-1
+rounded-full
+text-xs
+text-gray-500
+">
+
+{currentDate}
+
+</span>
+
+</div>
+
+)
+}
+
+
+<div 
+className={`flex mb-3 ${isMe ? "justify-end" : "justify-start"}`}
+>
+
+
+<div
+
+className={`
+px-4 
+py-2 
+rounded-2xl 
+max-w-[60%] 
+shadow 
+
+${isMe 
+? 
+"bg-[#454c4f] text-white rounded-br-none" 
+: 
+"bg-white text-black rounded-bl-none"
+}
+
+`}
+
+>
+
+
+{
+msg.type === "gif" ?
+
+<img
+
+src={msg.gif}
+
+className="
+w-48
+rounded-xl
+"
+
+/>
+
+:
+
+<p>{msg.text}</p>
+
+}
+
+
+<p className="
+text-xs
+opacity-60
+mt-1
+text-right
+">
+
+{
+msg.time?.toDate 
+?
+msg.time.toDate().toLocaleTimeString(
+[],
+{
+hour:"2-digit",
+minute:"2-digit"
+}
+)
+:
+""
+}
+
+
+{
+isMe && 
+
+<span>
+
+{
+msg.seen ? " ✓✓" : " ✓"
+}
+
+</span>
+
+}
+
+
+</p>
+
+
+</div>
+
+</div>
+
+
+</React.Fragment>
+
+);
+
+})
+
+}
 
                 <div ref={bottomRef}></div>
               </div>
+               
+               {
+showGif &&
 
+<div className="
+absolute
+bottom-24
+right-10
+bg-white
+shadow-xl
+rounded-xl
+p-4
+w-[350px]
+z-50
+">
+
+<input
+
+value={gifSearch}
+
+onChange={(e)=>
+setGifSearch(e.target.value)
+}
+
+onKeyDown={(e)=>{
+
+if(e.key==="Enter")
+searchGif();
+
+}}
+
+placeholder="Search GIF"
+
+className="
+border
+p-3
+rounded-xl
+w-full
+mb-3
+"
+
+/>
+
+
+<div className="
+grid
+grid-cols-2
+gap-2
+h-80
+overflow-y-auto
+">
+
+{
+gifs.map((gif)=>(
+
+<img
+
+key={gif.id}
+
+src={
+gif.images.fixed_height.url
+}
+
+onClick={()=>{
+
+sendGif(
+gif.images.fixed_height.url
+);
+
+}}
+
+className="
+rounded-lg
+cursor-pointer
+"
+
+/>
+
+))
+}
+
+</div>
+
+
+</div>
+
+}
               {/* INPUT BAR */}
               <div className="
                 p-4
