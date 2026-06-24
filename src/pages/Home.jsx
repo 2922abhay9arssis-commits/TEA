@@ -23,6 +23,7 @@ import {
 import { db } from "../firebase/config";
 
 function Home() {
+  const [reactionBox, setReactionBox] = useState(null);
   const [typing, setTyping] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [chatInfo, setChatInfo] = useState({});
@@ -121,7 +122,12 @@ function Home() {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       let msgs = [];
-      snapshot.forEach((doc) => msgs.push(doc.data()));
+      snapshot.forEach((doc) =>
+  msgs.push({
+    id: doc.id,
+    ...doc.data()
+  })
+);
       setMessages(msgs);
     });
 
@@ -194,6 +200,9 @@ function Home() {
       time: new Date(),
     };
 
+
+    
+
     socket.emit("send-message", data);
 
     await addDoc(collection(db, "chats", data.room, "messages"), { ...data, time: serverTimestamp() });
@@ -210,6 +219,28 @@ function Home() {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   }
+
+  const addReaction = async (msgId, emoji) => {
+
+    const chatId =
+[auth.currentUser.uid, selectedUser.uid]
+.sort()
+.join("_");
+
+await updateDoc(
+doc(
+db,
+"chats",
+chatId,
+"messages",
+msgId
+),
+{
+reaction: emoji
+}
+);
+
+};
 
   async function searchUser() {
     if (search === "") return;
@@ -276,7 +307,7 @@ year:"numeric"
 ">
       {/* LEFT SIDEBAR */}
       <div className="
-      w-[380px]
+      w-95
       bg-white
       border-r
       flex
@@ -417,7 +448,9 @@ year:"numeric"
     bg-[#f5efe6]
 ">
   {
-messages.map((msg,index)=>{
+  messages.map((msg,index)=>{
+
+  
 
 
 const currentDate =
@@ -473,11 +506,21 @@ className={`flex mb-3 ${isMe ? "justify-end" : "justify-start"}`}
 
 <div
 
+onContextMenu={(e)=>{
+ e.preventDefault();
+ setReactionBox(msg.id);
+}}
+
+
+
 className={`
+relative
 px-4 
 py-2 
 rounded-2xl 
 max-w-[60%] 
+wrap-break-word
+whitespace-pre-wrap
 shadow 
 
 ${isMe 
@@ -511,6 +554,56 @@ rounded-xl
 <p>{msg.text}</p>
 
 }
+
+{
+reactionBox === msg.id && (
+
+<div className="
+absolute
+bottom-full
+right-0
+mb-2
+z-[999]
+bg-white
+shadow-lg
+rounded-full
+px-3
+py-2
+flex
+gap-3
+">
+
+{["☕","😂","❤️","🔥","😮"].map((emoji)=>(
+
+<span
+onClick={() =>{
+
+  addReaction(msg.id,emoji);
+  setReactionBox(null);
+
+}
+
+
+}
+className="cursor-pointer text-xl"
+>
+{emoji}
+</span>
+
+))}
+
+</div>
+
+)}
+
+
+{msg.reaction && (
+
+<span className="text-sm">
+{msg.reaction}
+</span>
+
+)}
 
 
 <p className="
@@ -579,7 +672,7 @@ bg-white
 shadow-xl
 rounded-xl
 p-4
-w-[350px]
+w-95
 z-50
 ">
 
